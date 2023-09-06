@@ -2,8 +2,8 @@
 
 namespace Dearvn\FilamentImpersonate\Tables\Actions;
 
-use Filament\Tables\Actions\Action;
 use Dearvn\FilamentImpersonate\Concerns\Impersonates;
+use Filament\Tables\Actions\Action;
 
 class Impersonate extends Action
 {
@@ -17,6 +17,6 @@ class Impersonate extends Action
             ->iconButton()
             ->icon('impersonate-icon')
             ->action(fn ($record) => $this->impersonate($record))
-            ->hidden(fn ($record) => !$this->canBeImpersonated($record));
+            ->hidden(fn ($record) => ! $this->canBeImpersonated($record));
     }
 }

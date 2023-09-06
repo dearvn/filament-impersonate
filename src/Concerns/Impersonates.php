@@ -5,37 +5,37 @@ namespace Dearvn\FilamentImpersonate\Concerns;
 use Closure;
 use Filament\Facades\Filament;
 use Illuminate\Http\RedirectResponse;
-use Octopy\Impersonate\ImpersonateManager;
 use Livewire\Features\SupportRedirects\Redirector;
+use Octopy\Impersonate\ImpersonateManager;
 
 trait Impersonates
 {
-    protected Closure|string|null $guard = null;
+    protected Closure | string | null $guard = null;
 
-    protected Closure|string|null $redirectTo = null;
+    protected Closure | string | null $redirectTo = null;
 
-    protected Closure|string|null $backTo = null;
+    protected Closure | string | null $backTo = null;
 
     public static function getDefaultName(): ?string
     {
         return 'impersonate';
     }
 
-    public function guard(Closure|string $guard): self
+    public function guard(Closure | string $guard): self
     {
         $this->guard = $guard;
 
         return $this;
     }
 
-    public function redirectTo(Closure|string $redirectTo): self
+    public function redirectTo(Closure | string $redirectTo): self
     {
         $this->redirectTo = $redirectTo;
 
         return $this;
     }
 
-    public function backTo(Closure|string $backTo): self
+    public function backTo(Closure | string $backTo): self
     {
         $this->backTo = $backTo;
 
@@ -62,20 +62,20 @@ trait Impersonates
         $current = Filament::auth()->user();
 
         return $current->isNot($target)
-            && !app(ImpersonateManager::class)->isInImpersonation()
-            && (!method_exists($current, 'canImpersonate') || $current->canImpersonate())
-            && (!method_exists($target, 'canBeImpersonated') || $target->canBeImpersonated());
+            && ! app(ImpersonateManager::class)->isInImpersonation()
+            && (! method_exists($current, 'canImpersonate') || $current->canImpersonate())
+            && (! method_exists($target, 'canBeImpersonated') || $target->canBeImpersonated());
     }
 
-    public function impersonate($record): bool|Redirector|RedirectResponse
+    public function impersonate($record): bool | Redirector | RedirectResponse
     {
-        if (!$this->canBeImpersonated($record)) {
+        if (! $this->canBeImpersonated($record)) {
             return false;
         }
 
         session()->put([
             'impersonate.back_to' => $this->getBackTo() ?? request('fingerprint.path') ?? Filament::getCurrentPanel()->getUrl(),
-            'impersonate.guard' => $this->getGuard()
+            'impersonate.guard' => $this->getGuard(),
         ]);
 
         app(ImpersonateManager::class)->take(

@@ -2,26 +2,24 @@
 
 namespace Dearvn\FilamentImpersonate;
 
+use BladeUI\Icons\Factory;
 use Dearvn\FilamentImpersonate\Commands\FilamentImpersonateCommand;
+use Dearvn\FilamentImpersonate\Tables\Actions\Impersonate;
 use Dearvn\FilamentImpersonate\Testing\TestsFilamentImpersonate;
+use Filament\Facades\Filament;
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
+use Filament\Support\Facades\FilamentView;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Blade;
 use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Filament\Facades\Filament;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Event;
-use Filament\Support\Facades\FilamentView;
-use Dearvn\FilamentImpersonate\Tables\Actions\Impersonate;
-use BladeUI\Icons\Factory;
-
 
 class FilamentImpersonateServiceProvider extends PackageServiceProvider
 {
@@ -29,7 +27,6 @@ class FilamentImpersonateServiceProvider extends PackageServiceProvider
 
     public static string $viewNamespace = 'filament-impersonate';
 
-    
     public function configurePackage(Package $package): void
     {
         /*
@@ -94,14 +91,14 @@ class FilamentImpersonateServiceProvider extends PackageServiceProvider
     {
         FilamentView::registerRenderHook(
             'panels::body.start',
-            static fn (): string => Blade::render("<x-filament-impersonate::banner/>")
+            static fn (): string => Blade::render('<x-filament-impersonate::banner/>')
         );
 
         // For backwards compatibility we're going to load our views into the namespace we used to use as well.
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'impersonate');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'impersonate');
 
         // Alias our table action for backwards compatibility.
-        if (!class_exists(\Dearvn\FilamentImpersonate\Impersonate::class)) {
+        if (! class_exists(\Dearvn\FilamentImpersonate\Impersonate::class)) {
             class_alias(Impersonate::class, \Dearvn\FilamentImpersonate\Impersonate::class);
         }
     }
@@ -174,7 +171,7 @@ class FilamentImpersonateServiceProvider extends PackageServiceProvider
     {
         $this->callAfterResolving(Factory::class, function (Factory $factory) {
             $factory->add('impersonate', [
-                'path' => __DIR__.'/../resources/views/icons',
+                'path' => __DIR__ . '/../resources/views/icons',
                 'prefix' => 'impersonate',
             ]);
         });
