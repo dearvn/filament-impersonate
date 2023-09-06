@@ -15,6 +15,13 @@ use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Event;
+use Filament\Support\Facades\FilamentView;
+use Dearvn\FilamentImpersonate\Tables\Actions\Impersonate;
+use BladeUI\Icons\Factory;
+
 
 class FilamentImpersonateServiceProvider extends PackageServiceProvider
 {
@@ -22,6 +29,7 @@ class FilamentImpersonateServiceProvider extends PackageServiceProvider
 
     public static string $viewNamespace = 'filament-impersonate';
 
+    
     public function configurePackage(Package $package): void
     {
         /*
@@ -30,6 +38,10 @@ class FilamentImpersonateServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package->name(static::$name)
+            ->hasRoute('web')
+            ->hasConfigFile()
+            ->hasTranslations()
+            ->hasViews()
             ->hasCommands($this->getCommands())
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
@@ -58,8 +70,40 @@ class FilamentImpersonateServiceProvider extends PackageServiceProvider
         }
     }
 
+    public function registeringPackage(): void
+    {
+        $this->clearStorage();
+
+        $this->registerIcon();
+    }
+
+    protected function clearStorage(): void
+    {
+        session()->forget([
+            'impersonate',
+            'impersonate.impersonator',
+            'impersonate.impersonated',
+        ]);
+    }
+
     public function packageRegistered(): void
     {
+    }
+
+    public function bootingPackage(): void
+    {
+        FilamentView::registerRenderHook(
+            'panels::body.start',
+            static fn (): string => Blade::render("<x-filament-impersonate::banner/>")
+        );
+
+        // For backwards compatibility we're going to load our views into the namespace we used to use as well.
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'impersonate');
+
+        // Alias our table action for backwards compatibility.
+        if (!class_exists(\Dearvn\FilamentImpersonate\Impersonate::class)) {
+            class_alias(Impersonate::class, \Dearvn\FilamentImpersonate\Impersonate::class);
+        }
     }
 
     public function packageBooted(): void
@@ -124,6 +168,16 @@ class FilamentImpersonateServiceProvider extends PackageServiceProvider
     protected function getIcons(): array
     {
         return [];
+    }
+
+    protected function registerIcon(): void
+    {
+        $this->callAfterResolving(Factory::class, function (Factory $factory) {
+            $factory->add('impersonate', [
+                'path' => __DIR__.'/../resources/views/icons',
+                'prefix' => 'impersonate',
+            ]);
+        });
     }
 
     /**
